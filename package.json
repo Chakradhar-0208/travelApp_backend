@@ -1,0 +1,26 @@
+{
+  "name": "travel_app_backend",
+  "version": "1.0.0",
+  "description": "travel app for budget-conscious travelers and backpackers. It helps you find affordable destinations, budget accommodations, cheap food spots, and share travel tips. With budget tracking, offline maps, and a community-driven approach, it’s your perfect travel companion for low-cost adventures.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AquarLabs-OpenSource/travel_app_backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AquarLabs-OpenSource/travel_app_backend/issues"
+  },
+  "homepage": "https://github.com/AquarLabs-OpenSource/travel_app_backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0"
+  }
+}
