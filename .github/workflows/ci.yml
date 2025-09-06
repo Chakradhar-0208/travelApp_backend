@@ -4,15 +4,11 @@ on:
   push:
     branches:
     - main
-    - kiran
-    - harshini
-    - chakree
+    - dev
   pull_request:
     branches:
     - main
-    - kiran
-    - harshini
-    - chakree
+    - dev
   
   workflow_dispatch:
 
