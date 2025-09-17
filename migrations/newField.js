@@ -14,10 +14,10 @@ async function newField() {
       .catch((err) => console.error("DB connection error:", err));
 
     await User.updateMany(
-      { gender: { $exists: false } }, // Adds the field if not existing 
-      { $set: { gender: null } }
+       { resetToken: { $exists: false } }, // Adds the field if not existing
+      { $set: { resetToken:  null } }
     );
-    console.log("Gender field added to Users.");
+    console.log("Google ID field added to Users.");
   } catch (error) {
     console.error("Migration failed:", error);
   } finally {
