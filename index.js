@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import "./configs/mongoDB.js";
 import testDB from "./routes/testDB.js";
-import homeRoute from "./routes/homeRoute.js";
-import testingRoutes from "./routes/testingRoute.js";
 import userRoutes from "./routes/userManagementRoute.js";
 
 
@@ -15,8 +13,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/testDB", testDB);
-app.use("/testing", testingRoutes);
-app.use("/home", homeRoute);
 app.use("/api/v1",userRoutes);
 
 
