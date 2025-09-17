@@ -41,4 +41,6 @@ async function migrate() {
   }
 }
 
-migrate();
+migrate(); //This creates schemas if not existed in DB
+
+

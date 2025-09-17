@@ -21,3 +21,6 @@ const informativePlacesSchema = new mongoose.Schema({
 });
 
 export default informativePlacesSchema;
+
+
+// Used this to reduce redundancy in Trip model

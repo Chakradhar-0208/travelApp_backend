@@ -13,7 +13,7 @@ async function addIndex() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await User.collection.createIndex({ role: 1 });
+    await User.collection.createIndex({ role: 1 });     // Adds new Index to DB
     console.log("Index on 'role' field added successfully.");
   } catch (error) {
     console.error("Migration failed:", error);

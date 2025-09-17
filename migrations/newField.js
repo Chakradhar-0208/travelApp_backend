@@ -14,7 +14,7 @@ async function newField() {
       .catch((err) => console.error("DB connection error:", err));
 
     await User.updateMany(
-      { gender: { $exists: false } },
+      { gender: { $exists: false } }, // Adds the field if not existing 
       { $set: { gender: null } }
     );
     console.log("Gender field added to Users.");

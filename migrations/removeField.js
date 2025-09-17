@@ -13,7 +13,7 @@ async function removeField() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await User.updateMany({}, { $unset: { gender: "" } });
+    await User.updateMany({}, { $unset: { gender: "" } });  // Delets the field from DB
     console.log("'Gender' removed from all users.");
   } catch (error) {
     console.error("Migration failed:", error);

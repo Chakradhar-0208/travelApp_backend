@@ -14,7 +14,7 @@ async function updateField() {
       .catch((err) => console.error("DB connection error:", err));
 
     await Journey.updateMany({ totalDistance: { $type: "string" } }, [
-      { $set: { totalDistance: { $toDouble: "$totalDistance" } } },
+      { $set: { totalDistance: { $toDouble: "$totalDistance" } } }, // Helps  in updating type of a field in DB.
     ]);
     console.log("Distance field updated to Number.");
   } catch (error) {

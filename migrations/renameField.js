@@ -13,7 +13,7 @@ async function renameField() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await User.updateMany({}, { $rename: { totalDistance: "tDist" } });
+    await User.updateMany({}, { $rename: { totalDistance: "tDist" } });   // Renames a field
     console.log("'totalDistance' renamed to 'tDist' for all users.");
   } catch (error) {
     console.error("Migration failed:", error);

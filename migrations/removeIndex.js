@@ -13,7 +13,7 @@ async function removeIndex() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await Journey.collection.dropIndex("userId_1");
+    await Journey.collection.dropIndex("userId_1");   // Drops the Index from DB
     console.log("Index on 'userId' removed.");
   } catch (error) {
     console.error("Migration failed:", error);
