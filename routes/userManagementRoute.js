@@ -1,6 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
-import upload from "../middleware/multer.js";
+import upload from "../middlewares/multer.js";
 import cloudinary from "../configs/cloudinary.js";
 import streamifier from "streamifier";
 
