@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "../models/User.js";
+import Review from "../models/Review.js";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
@@ -13,8 +13,11 @@ async function removeField() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await User.updateMany({}, { $unset: { gender: "" } });  // Delets the field from DB
-    console.log("'Gender' removed from all users.");
+    const result = await Review.updateMany(
+      {},
+      { $unset: { checkpoints:[]} }
+    ); // Deletes the field from DB
+    console.log(`Migration success, ${result.modifiedCount} documents affected.`);
   } catch (error) {
     console.error("Migration failed:", error);
   } finally {

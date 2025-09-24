@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Journey from "../models/Journey.js";
+import Review from "../models/Review.js";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
@@ -13,10 +13,10 @@ async function updateField() {
       .then(() => console.log("DB Connected"))
       .catch((err) => console.error("DB connection error:", err));
 
-    await Journey.updateMany({ totalDistance: { $type: "string" } }, [
-      { $set: { totalDistance: { $toDouble: "$totalDistance" } } }, // Helps  in updating type of a field in DB.
+const result =  await Review.updateMany({ upVotes :{$gt:0} }, [
+      { $set: { upVotes: 0, downVotes:0 } }, // Helps  in updating type of a field in DB.
     ]);
-    console.log("Distance field updated to Number.");
+    console.log(`Migration success. ${result.modifiedCount} documents affected.`);
   } catch (error) {
     console.error("Migration failed:", error);
   } finally {
