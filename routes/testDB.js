@@ -5,7 +5,7 @@ import Review from "../models/Review.js";
 import Report from "../models/Report.js";
 import Journey from "../models/Journey.js";
 import upload from "../middlewares/multer.js";
-import cloudinary from "../configs/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import upload from "../middlewares/multer.js";
-import cloudinary from "../configs/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 const router = express.Router();
