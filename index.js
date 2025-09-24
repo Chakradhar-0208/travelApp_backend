@@ -4,7 +4,7 @@ import cors from "cors";
 import "./configs/mongoDB.js";
 import testDB from "./routes/testDB.js";
 import userRoutes from "./routes/userManagementRoute.js";
-
+import reviewRoutes from "./routes/reviewManagementRoute.js";
 
 dotenv.config();
 const app = express();
@@ -13,8 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/testDB", testDB);
-app.use("/api/v1",userRoutes);
-
+app.use("/api/v1/users",userRoutes);
+app.use("/api/v1/trips",reviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Travel App API");
