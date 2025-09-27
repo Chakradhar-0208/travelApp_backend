@@ -35,11 +35,15 @@ const journeySchema = new mongoose.Schema(
     },
     startedOn: { type: Date },
     completedOn: { type: Date, index: false }, // journey completion
-    totalDistance: { type: Number, min: 0, index: true }, // in kms
-    totalDuration: { type: Number, min: 0 }, // in hours
+    totalDistance: { type: Number, min: 0, index: true, default: 0 }, // in kms
+    totalDuration: { type: Number, min: 0 , default:0}, // in hours
     checkpoints: [
-      { completedAt: { type: Date } }, //checkpoint completion
-    ],
+      { completedAt: { type: Date } , //checkpoint completion
+      name:{type:String},
+      coordinates : [{type:Number}],
+      distance:{type: Number, min:0}, // in kms
+      duration: {type:Number, min:0} //in hrs..
+  }],
     notes: { type: String },
   },
   { timestamps: true }

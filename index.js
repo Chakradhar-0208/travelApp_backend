@@ -5,6 +5,7 @@ import "./config/mongoDB.js";
 import testDB from "./routes/testDB.js";
 import userRoutes from "./routes/userManagementRoute.js";
 import reviewRoutes from "./routes/reviewManagementRoute.js";
+import journeyRoutes from "./routes/journeyManagementRoute.js";
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,8 @@ app.use(express.json());
 app.use("/testDB", testDB);
 app.use("/api/v1/users",userRoutes);
 app.use("/api/v1/trips",reviewRoutes);
+app.use("/api/v1/journeys",journeyRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Travel App API");
