@@ -5,11 +5,18 @@ const GeoJSONPoint = {
   type: {
     type: String,
     enum: ["Point"],
+    default:"Point",
     required: true,
   },
   coordinates: {
     type: [Number],
     required: true,
+     validate: {
+    validator: function (arr) {
+      return Array.isArray(arr) && arr.length === 2;
+    },
+    message: "Coordinates must be [longitude, latitude]",
+  },
   },
 };
 
@@ -56,6 +63,7 @@ const tripSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       enum: ["easy", "moderate", "hard"],
+      default:"easy",
     },
 
     imageURLs: [{ type: String }],

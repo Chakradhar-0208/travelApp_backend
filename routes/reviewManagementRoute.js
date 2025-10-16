@@ -97,7 +97,7 @@ router.put( // allows to update specific fileds of a review
         body.checkpoints = JSON.parse(body.checkpoints);
       } catch (e) {
         return res.status(400).send("Invalid checkpoints format");
-      }
+      }   
     }
     for (const key of allowedFields) {
       if (body[key] !== undefined) {

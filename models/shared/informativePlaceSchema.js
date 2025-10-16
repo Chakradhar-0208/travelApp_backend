@@ -4,6 +4,7 @@ const GeoJSONPoint = {
   type: {
     type: String,
     enum: ["Point"],
+    default:"Point",
     required: true,
   },
   coordinates: {
