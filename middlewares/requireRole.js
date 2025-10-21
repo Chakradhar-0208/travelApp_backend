@@ -11,3 +11,5 @@ export function requireRole(role) {
         next();
     };
 }
+
+export default requireRole;

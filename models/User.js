@@ -44,7 +44,11 @@ const userSchema = new mongoose.Schema(
       // Improvised
       budgetRange: { type: String },
       altitudeSickness: { type: Boolean, default: false },
+      tripSuggestions : {type: Boolean, default: false}, // all three are related to notifications
+      checkpointAlerts : {type: Boolean, default: false},
+      systemUpdates : {type: Boolean, default: false},
     },
+    fcmToken: {type: String, default: null},
     status: {
       type: String,
       enum: ["active", "banned", "inactive"],
