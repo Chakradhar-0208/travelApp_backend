@@ -1,16 +1,20 @@
 import express from "express";
 import User from "../models/User.js";
+import Trip from "../models/Trip.js";
+import Review from "../models/Review.js";
+import Report from "../models/Report.js";
+import Journey from "../models/Journey.js";
 import upload from "../middlewares/multer.js";
 import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
-
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  res.send("User Management Route Active");
+  res.send("Test DB Route Active");
 });
 
 router.post("/createUser", async (req, res) => {
+  // const {name, email, password,phone}=req.body;
   const user = new User(req.body);
 
   if (!user.name || !user.email || !user.password) {
@@ -72,43 +76,6 @@ router.get("/getUser", async (req, res) => {
   }
 });
 
-router.delete("/deleteUser", async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not Found" });
-    }
-    await User.deleteOne({ email });
-    res.status(200).json({ messsage: "User Deleted Successfully" });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-router.get("/getProfileImage", async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user || !user.profileImage) {
-      return res.status(404).json({ message: "Unable to fetch Profile Image" });
-    }
-    const ImageURL = cloudinary.url(user.profileImage, { // Returns a optimized url 
-      width: 150,
-      height: 150,
-      crop: "fill",
-      quality: "auto",
-      fetch_format: "auto",
-    });
-
-    res.status(200).json({ profileImage: ImageURL });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
 router.post("/updateProfileImage", upload.single("profileImage"), async (req, res) => {
     const { email } = req.body;
 
@@ -122,7 +89,7 @@ router.post("/updateProfileImage", upload.single("profileImage"), async (req, re
       const lastName = name[name.length - 1];
       const publicId = `${lastName}-${user._id}`;
 
-      const result = await cloudinary.uploader.upload_stream(  // Uploads steam into cloud
+      const result = await cloudinary.uploader.upload_stream(
         {
           public_id: publicId,
           overwrite: true,
@@ -133,7 +100,7 @@ router.post("/updateProfileImage", upload.single("profileImage"), async (req, re
             return res.status(500).json({ error: error.message });
           }
 
-          user.profileImage = uploadedResult.public_id;
+          user.profileImage = uploadedResult.secure_url;
           await user.save();
 
           res.json({
@@ -143,15 +110,87 @@ router.post("/updateProfileImage", upload.single("profileImage"), async (req, re
         }
       );
       const streamifier = await import("streamifier");
-      streamifier.createReadStream(req.file.buffer).pipe(result);  // Converts memory buffer into node readable stream and pipes it to result.
+      streamifier.createReadStream(req.file.buffer).pipe(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
 );
+router.delete("/deleteUser", async (req, res) => {
+  const { email } = req.body;
 
-router.get("/profile", (req, res) => {
-  res.json({ status: "working" });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "User not Found" });
+    }
+    await User.deleteOne({ email });
+    res.status(200).json({ messsage: "User Deleted Successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post("/createTrip", async (req, res) => {
+  const trip = new Trip(req.body);
+  try {
+    await trip.save();
+    res.status(201).json({ message: "Trip created Successfuly.." });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.get("/getAllTrips", async (req, res) => {
+  try {
+    const trips = await Trip.find().populate("createdBy", "name email role");
+    res.status(200).json(trips);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post("/createReview", async (req, res) => {
+  const review = new Review(req.body);
+  try {
+    await review.save();
+    res.status(201).json({ message: "Review created Successsfullyy..." });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post("/createJourney", async (req, res) => {
+  const journey = new Journey(req.body);
+  try {
+    await journey.save();
+    res.status(201).json({ message: "Journey created Successfully........." });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post("/createReport", async (req, res) => {
+  const report = new Report(req.body);
+
+  try {
+    await report.save();
+    res.status(201).json({ message: "Report created Successfully.." });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.get("/getJourneys", async (req, res) => {
+  try {
+    const journey = await Journey.find()
+      .populate("tripId", "name tripType duration ")
+      .populate("userId", "name email role");
+    console.log(journey);
+    res.status(200).json(journey);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 export default router;
