@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema(
         "leisure",
         "business",
         "family",
-        "romantic",
         "solo",
         "group",
       ],
@@ -41,6 +40,7 @@ const userSchema = new mongoose.Schema(
       index: true,
     },
     preferences: {
+      tripDifficulty: { type: String, enum: ["easy", "moderate", "hard"],default:"moderate" },
       // Improvised
       budgetRange: { type: String },
       altitudeSickness: { type: Boolean, default: false },

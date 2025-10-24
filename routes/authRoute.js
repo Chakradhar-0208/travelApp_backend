@@ -5,8 +5,8 @@ import User from "../models/User.js"; // Adjust path
 import dotenv from "dotenv";
 import axios from "axios";
 
-
 import { transporter } from "../config/transporter.js";
+
 
 dotenv.config();
 

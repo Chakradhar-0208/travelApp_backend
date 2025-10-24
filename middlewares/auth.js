@@ -8,6 +8,7 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403); // invalid token
+     console.log("Decoded JWT:", user);
     req.user = user; // attach decoded payload
     next();
   });

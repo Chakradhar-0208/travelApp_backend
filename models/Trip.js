@@ -37,7 +37,10 @@ const tripSchema = new mongoose.Schema(
 
     distance: { type: Number, min: 0, required: true, index: true }, // kms
     duration: { type: Number, min: 0, required: true }, // hrs
-
+    ////////////
+    keywords: [{ type: String }],
+    altitudeSickness:{type:Boolean, default:false},
+    /////////
     estimatedCost: {
       car: {
         fuel: { type: Number, min: 0, required: true },
