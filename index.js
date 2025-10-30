@@ -10,12 +10,15 @@ import tripRoutes from "./routes/tripManagementRoute.js";
 // import notificationRoutes from "./routes/notificationsRoute.js";
 import recommendationRoutes from "./routes/recommendationRoute.js";
 import authRoutes from "./routes/authRoute.js";
+import { performanceMonitor, metricsHandler } from "./middlewares/performanceMonitor.js";
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
-app.use(express.json());
-
+app.use(express.json()); 
+app.use(performanceMonitor);
+app.use("/metrics", metricsHandler);
 app.use("/testDB", testDB);
 app.use("/api/v1/users",userRoutes);
 app.use("/api/v1/reviews",reviewRoutes);
@@ -24,6 +27,7 @@ app.use("/api/v1/trips",tripRoutes);
 // app.use("/api/v1/notifications", notificationRoutes); 
 app.use("/api/v1/auth", authRoutes);
 app.use("/recommendations",recommendationRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Travel App API");
