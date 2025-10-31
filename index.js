@@ -11,6 +11,7 @@ import tripRoutes from "./routes/tripManagementRoute.js";
 import recommendationRoutes from "./routes/recommendationRoute.js";
 import authRoutes from "./routes/authRoute.js";
 import { performanceMonitor, metricsHandler } from "./middlewares/performanceMonitor.js";
+import adminRoutes from "./routes/adminRoute.js";
 
 dotenv.config();
 const app = express();
@@ -27,7 +28,7 @@ app.use("/api/v1/trips",tripRoutes);
 // app.use("/api/v1/notifications", notificationRoutes); 
 app.use("/api/v1/auth", authRoutes);
 app.use("/recommendations",recommendationRoutes);
-
+app.use("/admin",adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Travel App API");

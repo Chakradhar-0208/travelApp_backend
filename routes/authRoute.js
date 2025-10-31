@@ -58,7 +58,7 @@ router.post("/login", async (req, res) => {
     }
 
     const authToken = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role }, // added role for admin auth
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -71,7 +71,8 @@ router.post("/login", async (req, res) => {
         name: user.name,
         phone: user.phone,
         email: user.email,
-        profileImage:user.profileImage
+        profileImage:user.profileImage,
+        role:user.role
       },
     });
   } catch (err) {

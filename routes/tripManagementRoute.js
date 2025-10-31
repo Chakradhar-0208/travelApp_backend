@@ -133,7 +133,7 @@ router.post("/",authenticateToken,upload.array("images"),async (req, res) => {
       if (body.estimatedCost?.car)  body.estimatedCost.car.total = totalCost(body.estimatedCost.car);
       if (body.estimatedCost?.bike) body.estimatedCost.bike.total = totalCost(body.estimatedCost.bike);
 
-      body.status = "active";  // ensures status is active on creation
+      body.status = "inactive";  // ensures status is inactive on creation, admin has to approve
       body.createdBy = req.user.userId; // sets createdBy from auth middleware
 
       const trip = new Trip(body);
@@ -167,14 +167,20 @@ router.post("/",authenticateToken,upload.array("images"),async (req, res) => {
 router.put("/:id",authenticateToken,upload.array("images"),async (req, res) => {
     try {
       const id = req.params.id;
-      const body = { ...req.body }; // takes data from body
-      parseToJSON(body);
 
       const trip = await Trip.findById(id);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
 
+      if(trip.createdBy.toString() !== req.user.userId){
+        return res.status(403).json({ error: "You are not authorized to update this trip" });
+      }
+
+      const body = { ...req.body }; // takes data from body
+      parseToJSON(body);
+
+
       const allowedFields = ["title","description","startPoint","endPoint","distance","duration","estimatedCost",
-                            "roadInfo","informativePlaces","journeyKit","precautions","checkPoints","tollGates","status",
+                            "roadInfo","informativePlaces","journeyKit","precautions","checkPoints","tollGates",
       ]; // only these fields can be updated
 
       for (const key of allowedFields) {
@@ -210,22 +216,25 @@ router.put("/:id",authenticateToken,upload.array("images"),async (req, res) => {
   }
 );
 
-router.put("/:id/status", authenticateToken, async (req, res) => { // updates trip status
+router.delete("/:id", authenticateToken, async (req, res) => { // deletes a trip
   try {
     const id = req.params.id;
-    const { status } = req.body;
-    if (!status) return res.status(400).json({ error: "Status is required" });
 
     const trip = await Trip.findById(id).select("status");
     if (!trip) return res.status(404).json({ error: "Trip not found" });
 
-    trip.status = status;
-    await trip.save();
+      if(trip.createdBy.toString() !== req.user.userId){  // only creator can delete
+        return res.status(403).json({ error: "You are not authorized to delete this trip" });
+      }
+      
+      if(trip.imageURLs && trip.imageURLs.length > 0)
+        await cloudinary.api.delete_resources_by_prefix(`trips/${trip._id}`);
+      await trip.deleteOne({_id: id});
 
-    invalidateTripCache(); // clear cache after status change
-    res.status(200).json({ message: "Status updated", status });
+    invalidateTripCache(); // clear cache after deletion
+    res.status(200).json({ message: "Trip deleted successfully" });
   } catch (err) {
-    console.error("Error updating status:", err);
+    console.error("Error deleting trip:", err);
     res.status(400).json({ error: err.message });
   }
 });
