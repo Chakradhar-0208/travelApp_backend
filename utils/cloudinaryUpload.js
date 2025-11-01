@@ -13,3 +13,16 @@ export const uploadToCloudinary = (fileBuffer, folder = "reviews") => {
     streamifier.createReadStream(fileBuffer).pipe(stream);
   });
 };
+
+export const uploadToCloudinaryFeedback = (fileBuffer, folder = "feedbacks") => {
+  return new Promise((resolve, reject) => {
+    let stream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+};
