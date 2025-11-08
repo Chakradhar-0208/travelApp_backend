@@ -57,6 +57,30 @@ router.get("/getUser", authenticateToken, async (req, res) => {
 });
 
 
+router.get("/savedTrips", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId)
+      .populate("savedTrips", "title imageURLs")
+      .select("savedTrips")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.status(200).json({
+      savedTrips: user.savedTrips || []
+    });
+  } catch (err) {
+    console.error("Error fetching saved trips:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
+
 router.put("/updateUser/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,31 +1,30 @@
 import mongoose from "mongoose";
-import Trip from "../models/Trip.js";
+import User from "../models/User.js";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 
-async function newField() {
+async function migrateSavedTrips() {
   try {
-    mongoose
-      .connect(process.env.MONGO_URI, {
-        dbName: "travelApp",
-      })
-      .then(() => console.log("DB Connected"))
-      .catch((err) => console.error("DB connection error:", err));
+    await mongoose.connect(process.env.MONGO_URI, {
+      dbName: "travelApp",
+    });
+    console.log("DB Connected");
 
-   const result =   Trip.updateMany(
-  { createdBy: { $exists: false } },
-  { $set: { createdBy: ObjectId("68bc4f33d545fbea2f801358") } } // replace with a real user ID
-);
-  
+    const result = await User.updateMany(
+      { savedTrips: { $exists: false } },       // only documents missing the field
+      { $set: { savedTrips: [] } }
+    );
 
-    console.log(`Migration success, ${result.modifiedCount} documents affected.`);
+    console.log(
+      `Migration success. ${result.modifiedCount} documents updated.`
+    );
   } catch (error) {
     console.error("Migration failed:", error);
   } finally {
-    mongoose.disconnect();
+    await mongoose.disconnect();
     console.log("DB Disconnected");
   }
 }
 
-newField();
+migrateSavedTrips();

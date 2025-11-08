@@ -39,6 +39,13 @@ const userSchema = new mongoose.Schema(
       default: "user",
       index: true,
     },
+    savedTrips: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Trip",
+        default: [],
+      }
+    ],
     preferences: {
       tripDifficulty: { type: String, enum: ["easy", "moderate", "hard"],default:"moderate" },
       // Improvised

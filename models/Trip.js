@@ -74,7 +74,7 @@ const tripSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive", "deleted"],
-      default: "active",
+      default: "inactive",
       index: true,
     },
 

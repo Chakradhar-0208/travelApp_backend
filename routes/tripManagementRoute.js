@@ -1,11 +1,13 @@
 import express from "express";
 import Trip from "../models/Trip.js";
 import upload from "../middlewares/multer.js";
+import User from "../models/User.js";
 import { v2 as cloudinary } from "cloudinary";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import authenticateToken from "../middlewares/auth.js";
 import rateLimit from "express-rate-limit";
 import {getCache,setCache,invalidateTripCache} from "../utils/caching/tripCache.js";
+import { sanitizeNumbers } from "../utils/sanitizeNumbers.js";
 
 const router = express.Router();
 
@@ -74,7 +76,7 @@ router.get("/", async (req, res) => {// gets all trips
     const skip = (page - 1) * limit;
 
     let query = Trip.find(filter)
-      .select("title description distance duration rating reviewCount imageURLs difficulty status")
+      .select("title description distance duration rating reviewCount imageURLs difficulty status startPoint endPoint estimatedCost")
       .sort(sort)
       .skip(skip)
       .limit(Number(limit))
@@ -125,18 +127,52 @@ router.get("/:id", async (req, res) => {// gets detailed view of a trip
 });
 
 
+router.post("/:id/save", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const tripId = req.params.id;
+
+    const trip = await Trip.findById(tripId).select("_id");
+    if (!trip) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    const user = await User.findById(userId).select("savedTrips");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.savedTrips?.includes(tripId)) {
+      return res.status(400).json({ error: "Trip already saved" });
+    }
+
+    await User.updateOne(
+      { _id: userId },
+      { $push: { savedTrips: tripId } }
+    );
+
+    res.status(200).json({ message: "Trip saved successfully" });
+  } catch (err) {
+    console.error("Error saving trip:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
 router.post("/",authenticateToken,upload.array("images"),async (req, res) => {
     try {
       const body = { ...req.body };
       parseToJSON(body); // returns parsed data
 
-      if (body.estimatedCost?.car)  body.estimatedCost.car.total = totalCost(body.estimatedCost.car);
-      if (body.estimatedCost?.bike) body.estimatedCost.bike.total = totalCost(body.estimatedCost.bike);
+      const cleanData = sanitizeNumbers(body);
 
-      body.status = "inactive";  // ensures status is inactive on creation, admin has to approve
-      body.createdBy = req.user.userId; // sets createdBy from auth middleware
+      if (cleanData.estimatedCost?.car)  cleanData.estimatedCost.car.total = totalCost(cleanData.estimatedCost.car);
+      if (cleanData.estimatedCost?.bike) cleanData.estimatedCost.bike.total = totalCost(cleanData.estimatedCost.bike);
 
-      const trip = new Trip(body);
+      cleanData.status = "inactive";  // ensures status is inactive on creation, admin has to approve
+      cleanData.createdBy = req.user.userId; // sets createdBy from auth middleware
+
+      const trip = new Trip(cleanData);
 
       if (req.files?.length > 0) { // uploads images to cloudinary if present
         const uploadedImages = await Promise.all(
@@ -178,13 +214,14 @@ router.put("/:id",authenticateToken,upload.array("images"),async (req, res) => {
       const body = { ...req.body }; // takes data from body
       parseToJSON(body);
 
+      const  cleanData = sanitizeNumbers(body);
 
       const allowedFields = ["title","description","startPoint","endPoint","distance","duration","estimatedCost",
                             "roadInfo","informativePlaces","journeyKit","precautions","checkPoints","tollGates",
       ]; // only these fields can be updated
 
       for (const key of allowedFields) {
-        if (body[key] !== undefined) trip[key] = body[key];
+        if (cleanData[key] !== undefined) trip[key] = cleanData[key];
       }
 
       if (trip.estimatedCost?.car)  trip.estimatedCost.car.total = totalCost(trip.estimatedCost.car);
@@ -238,5 +275,39 @@ router.delete("/:id", authenticateToken, async (req, res) => { // deletes a trip
     res.status(400).json({ error: err.message });
   }
 });
+
+router.delete("/saved-trips/:tripId", authenticateToken, async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const userId = req.user.userId;
+
+    if (!tripId) {
+      return res.status(400).json({ message: "TripId is required" });
+    }
+
+    if (!isValidObjectId(tripId)) {
+      return res.status(400).json({ message: "Invalid Trip Id" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user.savedTrips.includes(tripId)) {
+      return res.status(400).json({ message: "This trip is not in saved list" });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { savedTrips: tripId }
+    });
+
+    res.status(200).json({
+      message: "success"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 export default router;
