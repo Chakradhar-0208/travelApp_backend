@@ -1,17 +1,19 @@
 import express from "express";
 import User from "../models/User.js";
+import Journey from "../models/Journey.js";
 import upload from "../middlewares/multer.js";
 import cloudinary from "../config/cloudinary.js";
 import { getCache, setCache, invalidateUserCache } from "../utils/caching/userCache.js";
 import authenticateToken from "../middlewares/auth.js";
 import streamifier from "streamifier";
+import Trip from "../models/Trip.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
   res.send("User Management Route Active");
 });
-
 
 router.get("/getUser", authenticateToken, async (req, res) => {
   try {
@@ -56,7 +58,6 @@ router.get("/getUser", authenticateToken, async (req, res) => {
   }
 });
 
-
 router.get("/savedTrips", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -78,8 +79,6 @@ router.get("/savedTrips", authenticateToken, async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-
-
 
 router.put("/updateUser/:id", authenticateToken, async (req, res) => {
   try {
@@ -129,7 +128,6 @@ router.put("/updateUser/:id", authenticateToken, async (req, res) => {
   }
 });
 
-
 router.get("/getProfileImage", async (req, res) => {
   try {
     const cacheKey = `profileImage:${JSON.stringify(req.query)}`;
@@ -164,11 +162,9 @@ router.get("/getProfileImage", async (req, res) => {
   }
 });
 
-
 router.put("/updateProfileImage", authenticateToken, upload.single("profileImage"), async (req, res) => {
-  const { email } = req.body;
-
   try {
+    const { email } = req.body;
     if (req.user.email !== email && req.user.role !== "admin") {
       return res.status(403).json({ message: "Access denied. Unauthorized user." });
     }
@@ -210,7 +206,6 @@ router.put("/updateProfileImage", authenticateToken, upload.single("profileImage
   }
 });
 
-
 router.post("/createUser", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -231,7 +226,6 @@ router.post("/createUser", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
-
 
 router.delete("/deleteUser", authenticateToken, async (req, res) => {
   const { email } = req.body;
@@ -256,6 +250,120 @@ router.delete("/deleteUser", authenticateToken, async (req, res) => {
   }
 });
 
+router.get("/analytics", authenticateToken, async (req, res) => {
+  try {
+    const user_id = req.user.userId;
+    console.log(user_id);
+
+    const journeys = await Journey.find({ userId: user_id })
+
+    const tripCount = journeys.length;
+
+    let totalDistance = 0;
+    let totalJourneyTime = 0;
+
+    let longestTrip = null;
+
+    journeys.forEach(trip => {
+      totalDistance += trip.totalDistance;
+      totalJourneyTime += trip.totalDuration;
+
+      if (!longestTrip || trip.totalDistance > longestTrip.distance) {
+        longestTrip = {
+          tripId: trip.tripId,
+          distance: trip.totalDistance,
+          duration: trip.totalDuration
+        };
+      }
+    });
+
+    res.status(200).json({ tripCount, longestTrip, totalJourneyTime, totalDistance });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+    console.error(error);
+  }
+})
+
+router.get("/saved-trips", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId)
+      .populate("savedTrips", "title");
+
+    if (!user)
+      return res.status(200).json([])
+
+    res.status(200).json(user.savedTrips);
+
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" })
+    console.error(error);
+  }
+})
+
+router.post("/saved-trips/:tripId", authenticateToken, async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const userId = req.user.userId;
+
+    if (!tripId) {
+      return res.status(400).json({ message: "TripId is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid((tripId)))
+      return res.status(400).json({ message: "Invalid Trip Id" })
+    
+    const trip = await Trip.findById(tripId);
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: {
+        savedTrips: tripId,
+      }
+    })
+    res.status(200).json({ message: "success" })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" })
+  }
+})
+
+router.delete("/saved-trips/:tripId", authenticateToken, async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const userId = req.user.userId;
+
+    if (!tripId) {
+      return res.status(400).json({ message: "TripId is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid((tripId))) {
+      return res.status(400).json({ message: "Invalid Trip Id" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user.savedTrips.includes(tripId)) {
+      return res.status(400).json({ message: "This trip is not in saved list" });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { savedTrips: tripId }
+    });
+
+    res.status(200).json({
+      message: "success"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+  });
 
 router.get("/profile", (req, res) => {
   res.json({ status: "User route working" });

@@ -2,13 +2,10 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"; // Adjust path
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import axios from "axios";
 
 import { transporter } from "../config/transporter.js";
-
-
-dotenv.config();
 
 const router = express.Router();
 
@@ -18,7 +15,6 @@ const router = express.Router();
 // ------------------
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Login request body:", req.body);
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required." });
@@ -71,8 +67,8 @@ router.post("/login", async (req, res) => {
         name: user.name,
         phone: user.phone,
         email: user.email,
-        profileImage:user.profileImage,
-        role:user.role
+        profileImage: user.profileImage,
+        role: user.role
       },
     });
   } catch (err) {
@@ -81,15 +77,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-
-
-
 // POST /auth/register
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, phone, profileImage } = req.body;
-    console.log("Register request body:", req.body);
 
 
     // Validation
@@ -186,7 +177,7 @@ router.post("/forgot-password", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ error: err.error });
   }
 });
 
@@ -195,16 +186,9 @@ router.post("/forgot-password", async (req, res) => {
  */
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
-  console.log(req.body);
   if (!token || !password) {
     return res.status(400).json({ message: "Token and new password required" });
   }
-const decoded = jwt.verify(token, process.env.JWT_SECRET);
-console.log("Decoded token:", decoded);
-
-const user = await User.findById(decoded.id);
-console.log("User from DB:", user);
-console.log("User resetToken:", user?.resetToken);
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
@@ -225,11 +209,9 @@ console.log("User resetToken:", user?.resetToken);
   }
 });
 
-
 router.post("/google", async (req, res) => {
   try {
     const { googleToken, deviceInfo } = req.body;
-    console.log(req.body);
     if (!googleToken) return res.status(400).json({ message: "Google token is required" });
 
     // Verify token directly via Google API
@@ -243,9 +225,9 @@ router.post("/google", async (req, res) => {
 
     if (!user) {
       // Register new user
-      
+
       user = new User({
-       name: googleUser.name || "Unknown User",
+        name: googleUser.name || "Unknown User",
         email: googleUser.email,
         googleId: googleUser.sub,
         profileImage: "avatar2",         // fixed value
@@ -253,23 +235,22 @@ router.post("/google", async (req, res) => {
         password: "#rnxhbeujinmfnvjekrnswrkjwnt",
       });
       await user.save();
-      console.log(user)
     } else {
       // Update Google ID if needed
       user.googleId = googleUser.sub;
       await user.save();
     }
 
-    
+
 
     // Inline JWT generation (optional)
     const token = jwt.sign(
-      { id: user._id, email: user.email},
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    res.json({ user, token}); // Return both user and token in the response
+    res.json({ user, token }); // Return both user and token in the response
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ message: "Server error" });
