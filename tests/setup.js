@@ -3,7 +3,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
 vi.spyOn(console, 'error').mockImplementation(() => { });
-// vi.spyOn(console, 'log').mockImplementation(() => { });
+vi.spyOn(console, 'log').mockImplementation(() => { });
 
 
 let mongo;
