@@ -10,7 +10,7 @@ const router = e.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-router.post("/feedback", authenticateToken, upload.array("screenshots"), async (req, res) => {
+router.post("/", authenticateToken, upload.array("screenshots"), async (req, res) => {
   try {
     const userId = req.user.userId;
     const { type, category, description, deviceInfo } = req.body;
@@ -43,10 +43,10 @@ router.post("/feedback", authenticateToken, upload.array("screenshots"), async (
 
     await feedback.save();
 
-    res.status(200).json({ message: "Feedback received successfully" });
+    res.status(200).json({feedback: feedback});
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ error: err });
   }
 });
 

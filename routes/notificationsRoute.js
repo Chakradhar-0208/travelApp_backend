@@ -45,6 +45,7 @@ router.post("/subscribe", authenticateToken, async (req, res) => {
     }
 });
 
+// Optional //! NO TESTS DONE ON THIS ROUTE
 router.post("/send", authenticateToken, async (req, res) => {
     try {
         const { title, description, type } = req.body;
@@ -61,7 +62,7 @@ router.post("/send", authenticateToken, async (req, res) => {
         const user = await User.findById(userId);
 
         const fcmToken = user.fcmToken;
-
+        console.log(user)
         if (fcmToken == "null" || !fcmToken || typeof fcmToken !== "string" || fcmToken.length < 100)
             return res.status(400).json({ message: "Invalid fcmToken" });
 
@@ -88,7 +89,7 @@ router.post("/send", authenticateToken, async (req, res) => {
 
         await notification.save();
 
-        res.status(200).json({ message: "Message sent Successfully" });
+        res.status(200).json(notification);
 
     } catch (error) {
         console.error(error);
