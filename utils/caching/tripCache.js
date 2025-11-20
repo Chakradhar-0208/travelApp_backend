@@ -43,12 +43,15 @@ export function invalidateTripCache() {
 }
 
 // auto cleans for every 10 mins
-setInterval(() => {
-  const now = Date.now();
-  for (const key in cache) {
-    if (cache[key].expires < now) delete cache[key];
-  }
-}, 10 * 60 * 1000);
+if (process.env.NODE_ENV !== "test") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const key in cache) {
+      if (cache[key].expires < now) delete cache[key];
+    }
+  }, 10 * 60 * 1000);
+}
+
 
 export default {
   setCache,

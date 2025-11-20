@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    dbName: "travelApp", //DataBase Name
-  })
-  .then(() => console.log("DB Connected"))
-  .catch((err) => console.error("DB connection error:", err));
+if (process.env.NODE_ENV !== "test") {
+  mongoose
+    .connect(process.env.MONGO_URI, { dbName: process.env.DB_NAME })
+    .then(() => console.log("DB Connected"))
+    .catch((err) => console.error("DB connection error:", err));
+}
 
 export default mongoose;

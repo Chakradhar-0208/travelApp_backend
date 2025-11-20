@@ -10,11 +10,11 @@ export const transporter = nodemailer.createTransport({
     pass: process.env.BREVO_PASS,
   },
 });
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP Error:", error);
-  } else {
-    console.log("Brevo SMTP is ready to send emails ✔");
-  }
-});
+if (process.env.NODE_ENV !== "test")
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("SMTP Error:", error);
+    } else {
+      console.log("Brevo SMTP is ready to send emails ✔");
+    }
+  });

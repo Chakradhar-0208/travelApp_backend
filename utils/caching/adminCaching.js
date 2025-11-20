@@ -42,6 +42,7 @@ export function invalidateAdminCache() {
 }
 
 // auto cleans for every 10 mins
+if (process.env.NODE_ENV !== "test")
 setInterval(() => {
   const now = Date.now();
   for (const key in cache) {

@@ -16,19 +16,19 @@ const memoryUsageGauge = new client.Gauge({ // memory usage percentage
 register.registerMetric(cpuUsageGauge);
 register.registerMetric(memoryUsageGauge);
 
+if (process.env.NODE_ENV !== "test")
+  setInterval(() => {
+    const memoryUsage = process.memoryUsage();
+    const totalMemory = os.totalmem();
+    const usedMemoryPercent = (memoryUsage.rss / totalMemory) * 100;
 
-setInterval(() => {
-  const memoryUsage = process.memoryUsage();
-  const totalMemory = os.totalmem();
-  const usedMemoryPercent = (memoryUsage.rss / totalMemory) * 100;
+    const cpuUsage = process.cpuUsage();
+    const totalCpuTime = cpuUsage.user + cpuUsage.system;
+    const totalCpuPercent = (totalCpuTime / (5 * 1e6 * os.cpus().length)) * 100; //updates every 5 seconds
 
-  const cpuUsage = process.cpuUsage();
-  const totalCpuTime = cpuUsage.user + cpuUsage.system;
-  const totalCpuPercent = (totalCpuTime / (5 * 1e6 * os.cpus().length)) * 100; //updates every 5 seconds
-
-  memoryUsageGauge.set(usedMemoryPercent);
-  cpuUsageGauge.set(totalCpuPercent);
-}, 5000);
+    memoryUsageGauge.set(usedMemoryPercent);
+    cpuUsageGauge.set(totalCpuPercent);
+  }, 5000);
 
 
 const httpRequestDuration = new client.Histogram({
