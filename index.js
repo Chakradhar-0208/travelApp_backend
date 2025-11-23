@@ -21,7 +21,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
-// app.use(performanceMonitor);
+app.use(performanceMonitor);
 app.use("/metrics", metricsHandler);
 // app.use("/testDB", testDB);
 app.use("/api/v1/users", userRoutes);
